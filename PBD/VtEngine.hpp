@@ -9,6 +9,10 @@
 #include <glm/glm.hpp>
 
 using namespace std;
+/*
+它主要分为四个部分：场景、GUI、物体实例、输入
+*/
+
 
 namespace Velvet
 {
@@ -23,15 +27,19 @@ namespace Velvet
 		VtEngine();
 		~VtEngine();
 
+		// 运行
 		int Run();
-
+		// 重置
 		void Reset();
+		// 切换场景
 		void SwitchScene(unsigned int sceneIndex);
+		// 设置场景
 		void SetScenes(const vector<shared_ptr<Scene>>& scenes);
-
+		// 窗口大小
 		glm::ivec2 windowSize();
-
+		// 场景数组
 		vector<shared_ptr<Scene>> scenes;
+		// 场景索引
 		unsigned int sceneIndex = 0;
 	private:
 		unsigned int m_nextSceneIndex = 0;
