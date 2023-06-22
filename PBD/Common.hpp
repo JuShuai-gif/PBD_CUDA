@@ -23,20 +23,20 @@ struct VtSimParams
 	int maxNumNeighbors				HOST_INIT(64);
 	float maxSpeed					HOST_INIT(50);						//!< The magnitude of particle velocity will be clamped to this value at the end of each step
 
-	// forces
+	// forces 力
 	glm::vec3 gravity				HOST_INIT(glm::vec3(0, -9.8f, 0));	//!< Constant acceleration applied to all particles
 	float bendCompliance			HOST_INIT(10.0f);
 	float damping					HOST_INIT(0.25f);					//!< Viscous drag force, applies a force proportional, and opposite to the particle velocity
 	float relaxationFactor			HOST_INIT(1.0f);					//!< Control the convergence rate of the parallel solver, default: 1, values greater than 1 may lead to instability
 	float longRangeStretchiness		HOST_INIT(1.2f);
 
-	// collision
+	// collision 碰撞
 	float collisionMargin			HOST_INIT(0.06f);					//!< Distance particles maintain against shapes, note that for robust collision against triangle meshes this distance should be greater than zero
 	float friction					HOST_INIT(0.1f);					//!< Coefficient of friction used when colliding against shapes
 	bool enableSelfCollision		HOST_INIT(true);
 	int interleavedHash				HOST_INIT(3);						//!< Hash once every n substeps. This can improves performance greatly.
 
-	// runtime info
+	// runtime info 运行信息
 	unsigned int numParticles;											//!< Total number of particles 
 	float particleDiameter;												//!< The maximum interaction radius for particles
 	float deltaTime;	
@@ -68,25 +68,33 @@ struct VtSimParams
 	}
 };
 
+// 运行状态
 struct VtGameState
 {
 	bool step = false;
+	// 暂停
 	bool pause = false;
+	// 渲染网格
 	bool renderWireframe = false;
+	// 渲染粒子
 	bool drawParticles = false;
+	// 隐藏GUI
 	bool hideGUI = false;
+	// 
 	bool detailTimer = false;
 };
 
+// 回调函数
 template <class T, class... TArgs>
 class VtCallback
 {
 public:
+	// 注册
 	void Register(const std::function<T>& func)
 	{
 		m_funcs.push_back(func);
 	}
-
+	// 激活
 	template <class... TArgs>
 	void Invoke(TArgs... args)
 	{
@@ -110,6 +118,7 @@ private:
 	std::vector<std::function<T>> m_funcs;
 };
 
+// 碰撞类型
 enum class ColliderType
 {
 	Sphere,

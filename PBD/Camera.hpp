@@ -24,24 +24,24 @@ namespace Velvet
 			name = __func__;
 			Global::camera = this;
 		}
-
+		// 位置
 		glm::vec3 position() const
 		{
 			return actor->transform->position;
 		}
-
+		// 前
 		glm::vec3 front() const
 		{
 			const glm::vec3 kFront = glm::vec3(0.0f, 0.0f, -1.0f);
 			return Helper::RotateWithDegree(kFront, actor->transform->rotation);
 		}
-
+		// 上
 		glm::vec3 up() const
 		{
 			const glm::vec3 kUp = glm::vec3(0.0f, 1.0f, 0.0f);
 			return Helper::RotateWithDegree(kUp, actor->transform->rotation);
 		}
-
+		// 视口
 		glm::mat4 view() const
 		{
 			auto trans = actor->transform;
@@ -49,7 +49,7 @@ namespace Velvet
 			auto result = glm::lookAt(position(), position() + front(), up());
 			return result;
 		}
-
+		// 投影
 		glm::mat4 projection() const
 		{
 			auto size = Global::game->windowSize();

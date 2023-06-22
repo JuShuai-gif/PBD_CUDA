@@ -64,18 +64,19 @@ namespace Velvet
 		m_material->SetFloat("material.smoothness", m_material->smoothness);
 		m_material->SetTexture("_ShadowTex", Global::game->depthFrameBuffer());
 
+		// 预先设置一些材质参数
 		if (m_materialProperty.preRendering)
 		{
 			m_materialProperty.preRendering(m_material.get());
 		}
 
-		// camera param
+		// 摄像机参数
 		m_material->SetVec3("_CameraPos", Global::camera->transform()->position);
 
-		// light params
+		// 灯光参数
 		SetupLighting(m_material);
 
-		// texture
+		// 贴图
 		int i = 0;
 		for (auto tex : m_material->textures)
 		{
@@ -85,7 +86,7 @@ namespace Velvet
 			i++;
 		}
 
-		// matrices
+		// 矩阵设置
 		auto model = actor->transform->matrix();
 		auto view = Global::camera->view();
 		auto projection = Global::camera->projection();
@@ -99,7 +100,8 @@ namespace Velvet
 		m_material->SetMat3("_Normalmatrix", glm::mat3(glm::transpose(glm::inverse(model))));
 
 		m_material->SetMat4("_WorldToLight", lightMatrix);
-
+		
+		// 真正的渲染在这里
 		DrawCall();
 	}	
 

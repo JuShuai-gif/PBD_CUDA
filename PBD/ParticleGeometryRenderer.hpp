@@ -4,7 +4,7 @@
 
 namespace Velvet
 {
-	// Render particles using geometry shader
+	// 使用几何着色器渲染粒子
 	class ParticleGeometryRenderer : public MeshRenderer
 	{
 	public:

@@ -9,6 +9,7 @@
 
 using namespace Velvet;
 
+// 输出GLFW错误
 void PrintGlfwError(int error, const char* description)
 {
 	std::cout << "Error(Glfw): Code({" << error << "}),{" << description << "}\n";
@@ -38,15 +39,20 @@ VtEngine::VtEngine()
 
 	glfwMakeContextCurrent(m_window); 
 	glfwSwapInterval(0);
-
+	// 窗口大小更改回调函数
 	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* m_window, int width, int height) {
 		glViewport(0, 0, width, height);
 		});
 
+	// 设置鼠标可见性
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	// 鼠标位置回调函数
 	glfwSetCursorPosCallback(m_window, [](GLFWwindow* m_window, double xpos, double ypos) {
 		Global::game->ProcessMouse(m_window, xpos, ypos);
 		});
+
+	// 
 	glfwSetScrollCallback(m_window, [](GLFWwindow* m_window, double xoffset, double yoffset) {
 		Global::game->ProcessScroll(m_window, xoffset, yoffset);
 		});
@@ -55,7 +61,6 @@ VtEngine::VtEngine()
 	// setup opengl
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		//fmt::print("Failed to initialize GLAD\n");
 		std::cout << "Failed to initialize GLAD\n";
 		return;
 	}
@@ -64,7 +69,7 @@ VtEngine::VtEngine()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	// setup stbi
+	// 反转贴图
 	stbi_set_flip_vertically_on_load(true);
 
 	// setup members

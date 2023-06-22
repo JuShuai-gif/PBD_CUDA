@@ -18,6 +18,7 @@ namespace Velvet
 
 		Collider(ColliderType _type)
 		{
+			// name是函数的名字
 			name = __func__;
 			type = _type;
 		}
@@ -33,6 +34,7 @@ namespace Velvet
 		void FixedUpdate() override
 		{
 			auto curPos = actor->transform->position;
+			// Timer::fixedDeltaTime()就是1/60
 			velocity = (curPos - lastPos) / Timer::fixedDeltaTime();
 			lastPos = actor->transform->position;
 
@@ -64,13 +66,16 @@ namespace Velvet
 		virtual glm::vec3 ComputeSphereSDF(glm::vec3 position)
 		{
 			auto mypos = actor->transform->position;
+
 			float radius = actor->transform->scale.x + Global::simParams.collisionMargin;
 
 			auto diff = position - mypos;
 			float distance = glm::length(diff);
 			if (distance < radius)
 			{
+				// 归一化碰撞向量
 				auto direction = diff / distance;
+				// 需要调整的距离计算出来
 				return (radius - distance) * direction;
 			}
 			return glm::vec3(0);

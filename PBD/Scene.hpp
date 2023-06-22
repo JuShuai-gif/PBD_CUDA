@@ -46,20 +46,16 @@ namespace Velvet
 				});
 		}
 
+		// 创建摄像机和灯光
 		void SpawnCameraAndLight(GameInstance* game)
 		{
-			//=====================================
-			// 1. Camera
-			//=====================================
+			// Camera
 			auto camera = SpawnCamera(game);
 			camera->Initialize(glm::vec3(0.35, 3.3, 7.2),
 				glm::vec3(1),
 				glm::vec3(-21, 2.25, 0));
 
-			//=====================================
-			// 2. Light
-			//=====================================
-
+			// Light
 			auto light = SpawnLight(game);
 			light->Initialize(glm::vec3(2.5f, 5.0f, 2.5f), 
 				glm::vec3(0.2f),
@@ -90,7 +86,8 @@ namespace Velvet
 			//	}
 			//	});
 		}
-	
+		
+		// 为了调试阴影使用的调试FBO
 		void SpawnDebug(GameInstance* game)
 		{
 			auto quad = game->CreateActor("Debug Quad");
@@ -128,13 +125,15 @@ namespace Velvet
 					});
 			}
 		}
-	
+		
+		// 创建布料网格
 		shared_ptr<Mesh> GenerateClothMesh(int resolution)
 		{
 			vector<glm::vec3> vertices;
 			vector<glm::vec3> normals;
 			vector<glm::vec2> uvs;
 			vector<unsigned int> indices;
+
 			const float clothSize = 2.0f;
 
 			for (int y = 0; y <= resolution; y++)
@@ -165,9 +164,10 @@ namespace Velvet
 				}
 			}
 			auto mesh = make_shared<Mesh>(vertices, normals, uvs, indices);
+			//std::cout << "创建网格数：" << indices.size() << std::endl;
 			return mesh;
 		}
-
+		// 创建不规则网格
 		shared_ptr<Mesh> GenerateClothMeshIrregular(int resolution)
 		{
 			vector<glm::vec3> vertices;
@@ -248,7 +248,13 @@ namespace Velvet
 			return mesh;
 		}
 
+		shared_ptr<Mesh> GenerateRopeMesh()
+		{
+			auto mesh = Resource::LoadMesh("cube.obj");
+			return mesh;
+		}
 
+		// 创建布料
 		shared_ptr<Actor> SpawnCloth(GameInstance* game, int resolution = 16, int textureFile = 1, shared_ptr<VtClothSolverGPU> solver = nullptr)
 		{
 			auto cloth = game->CreateActor("Cloth Generated");
@@ -270,8 +276,12 @@ namespace Velvet
 				mat->specular = 0.01f;
 			};
 
+			// 创建网格
+
 			auto mesh = GenerateClothMesh(resolution);
 			//auto mesh = GenerateClothMeshIrregular(resolution);
+			//auto mesh = GenerateRopeMesh();
+
 
 			auto renderer = make_shared<MeshRenderer>(mesh, material, true);
 			renderer->SetMaterialProperty(materialProperty);
@@ -295,6 +305,7 @@ namespace Velvet
 			return cloth;
 		}
 
+		// 创建球体
 		shared_ptr<Actor> SpawnSphere(GameInstance* game)
 		{
 			auto sphere = game->CreateActor("Sphere");
@@ -314,10 +325,14 @@ namespace Velvet
 			return sphere;
 		}
 
+		// 创建灯光
 		shared_ptr<Actor> SpawnLight(GameInstance* game)
 		{
+			// 先创建一个Actor
 			auto actor = game->CreateActor("Prefab Light");
+			// 灯光的mesh
 			auto mesh = Resource::LoadMesh("cylinder.obj");
+			// 
 			auto material = Resource::LoadMaterial("Assets/Shader/UnlitWhite");
 			auto renderer = make_shared<MeshRenderer>(mesh, material);
 			auto light = make_shared<Light>();
@@ -326,6 +341,7 @@ namespace Velvet
 			return actor;
 		}
 
+		// 创建摄像机
 		shared_ptr<Actor> SpawnCamera(GameInstance* game)
 		{
 			auto actor = game->CreateActor("Prefab Camera");
@@ -335,6 +351,7 @@ namespace Velvet
 			return actor;
 		}
 
+		// 创建平面
 		shared_ptr<Actor> SpawnInfinitePlane(GameInstance* game)
 		{
 			auto infPlane = game->CreateActor("Infinite Plane");
@@ -367,6 +384,26 @@ namespace Velvet
 			};
 
 			auto mesh = Resource::LoadMesh("cube.obj");
+			auto renderer = make_shared<MeshRenderer>(mesh, material, true);
+			renderer->SetMaterialProperty(materialProperty);
+
+			auto collider = make_shared<Collider>(ColliderType::Cube);
+			cube->AddComponents({ renderer, collider });
+			return cube;
+		}
+
+		shared_ptr<Actor> SpawnTestRope(GameInstance* game, shared_ptr<Mesh> mesh, glm::vec3 color = glm::vec3(0.5f))
+		{
+			auto cube = game->CreateActor("Rope");
+			auto material = Resource::LoadMaterial("_Default");
+
+			MaterialProperty materialProperty;
+			materialProperty.preRendering = [color](Material* mat) {
+				mat->SetVec3("material.tint", color);
+				mat->SetBool("material.useTexture", false);
+			};
+
+			// auto mesh = Resource::LoadMesh("cube.obj");
 			auto renderer = make_shared<MeshRenderer>(mesh, material, true);
 			renderer->SetMaterialProperty(materialProperty);
 

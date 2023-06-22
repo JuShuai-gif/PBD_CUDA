@@ -1,9 +1,10 @@
 #pragma once
-
 #include "GameInstance.hpp"
 #include "Light.hpp"
 #include "MeshRenderer.hpp"
-
+/*
+渲染管线类
+*/
 namespace Velvet
 {
 	class RenderPipeline
@@ -11,12 +12,11 @@ namespace Velvet
 	public:
 		RenderPipeline()
 		{
-			// configure depth map FBO
-			// -----------------------
+			// 配置深度图FBO
 			const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 			//unsigned int depthMapFBO;
 			glGenFramebuffers(1, &depthFrameBuffer);
-			// create depth texture
+			// 创建深度贴图
 			glGenTextures(1, &depthTex);
 			glBindTexture(GL_TEXTURE_2D, depthTex);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -26,7 +26,7 @@ namespace Velvet
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 			float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
 			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-			// attach depth texture as FBO's depth buffer
+			// 附加深度贴图到深度缓冲
 			glBindFramebuffer(GL_FRAMEBUFFER, depthFrameBuffer);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
 			glDrawBuffer(GL_NONE);
@@ -59,7 +59,7 @@ namespace Velvet
 		unsigned int depthFrameBuffer = 0;
 		unsigned int depthTex = 0;
 	private:
-
+		// 计算灯光矩阵
 		glm::mat4 ComputeLightMatrix()
 		{
 			if (Global::lights.size() == 0)
@@ -87,7 +87,7 @@ namespace Velvet
 			lightSpaceMatrix = lightProjection * lightView;
 			return lightSpaceMatrix;
 		}
-
+		// 渲染阴影
 		void RenderShadow(vector<MeshRenderer*> renderers)
 		{
 			if (Global::lights.size() == 0)
@@ -113,7 +113,7 @@ namespace Velvet
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, originalWindowSize.x, originalWindowSize.y);
 		}
-
+		// 渲染物体
 		void RenderObjects(vector<MeshRenderer*> renderers)
 		{        
 			// reset viewport

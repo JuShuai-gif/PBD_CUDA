@@ -13,6 +13,7 @@
 
 using namespace Velvet;
 
+// 构造函数
 GameInstance::GameInstance(GLFWwindow* window, shared_ptr<GUI> gui)
 {
 	Global::game = this;
@@ -67,6 +68,7 @@ unsigned int GameInstance::depthFrameBuffer()
 	return m_renderPipeline->depthTex;
 }
 
+// 窗口大小
 glm::ivec2 Velvet::GameInstance::windowSize()
 {
 	glm::ivec2 result;
@@ -100,8 +102,8 @@ void GameInstance::ProcessKeyboard(GLFWwindow* m_window)
 	}
 	if (Global::input->GetKeyDown(GLFW_KEY_O))
 	{
-		Global::gameState.step = true;
-		Global::gameState.pause = false;
+		Global::gameState.step = !Global::gameState.step;
+		Global::gameState.pause = !Global::gameState.pause;
 	}
 	for (int i = 0; i < 9; i++)
 	{
@@ -116,8 +118,10 @@ void GameInstance::ProcessKeyboard(GLFWwindow* m_window)
 	}
 }
 
+// 初始化
 void GameInstance::Initialize()
 {
+	// 所有物体都开始
 	for (const auto& go : m_actors)
 	{
 		go->Start();
@@ -128,7 +132,7 @@ void GameInstance::MainLoop()
 {
 	double initTime = Timer::EndTimer("GAME_INSTANCE_INIT") * 1000;
 	std::cout << "Info(GameInstance): Initialization success within " << std::fixed << std::setprecision(2) << initTime << " ms. Enter main loop." << std::endl;
-	// render loop
+	// 渲染循环
 	while (!glfwWindowShouldClose(m_window) && !pendingReset)
 	{
 		if (windowMinimized())
@@ -136,10 +140,10 @@ void GameInstance::MainLoop()
 			glfwPollEvents();
 			continue;
 		}
-		// Input
+		// 输入事件
 		ProcessKeyboard(m_window);
 
-		// Init
+		// 初始化
 		glClearColor(skyColor.x, skyColor.y, skyColor.z, skyColor.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, Global::gameState.renderWireframe ? GL_LINE : GL_FILL);
@@ -147,12 +151,15 @@ void GameInstance::MainLoop()
 		Timer::StartTimer("CPU_TIME");
 		Timer::UpdateDeltaTime();
 
-		// Logic Updates
-		if (!Global::gameState.hideGUI) m_gui->OnUpdate();
+		// GUI循环
+		if (!Global::gameState.hideGUI) 
+			m_gui->OnUpdate();
 
+		// 场景循环
 		if (!Global::gameState.pause)
 		{
 			Timer::NextFrame();
+			
 			if (Timer::NextFixedFrame())
 			{
 				for (const auto& go : m_actors) go->FixedUpdate();
@@ -185,6 +192,7 @@ void GameInstance::MainLoop()
 	}
 }
 
+// 终止
 void GameInstance::Finalize()
 {
 	for (const auto& go : m_actors)

@@ -12,33 +12,45 @@
 #include "VtEngine.hpp"
 #include "Camera.hpp"
 
+/*
+思路：相当于把屏幕坐标的位置逆向到三维物体上
+*/
+
 namespace Velvet
 {
+	// 射线
 	struct Ray
 	{
+		// 源点
 		glm::vec3 origin;
+		// 方向
 		glm::vec3 direction;
 	};
 
 	struct RaycastCollision
 	{
+		// 是否碰撞
 		bool collide = false;
+		// 物体的索引
 		int objectIndex;
+		// 距离源点的距离
 		float distanceToOrigin;
 	};
 
 	class MouseGrabber
 	{
 	public:
+		// 初始化
 		void Initialize(VtMergedBuffer<glm::vec3>* positions, VtBuffer<glm::vec3>* velocities, VtBuffer<float>* invMass)
 		{
 			m_positions = positions;
 			m_velocities = velocities;
 			m_invMass = invMass;
 		}
-
+		// 处理鼠标交互
 		void HandleMouseInteraction()
 		{
+			// 是否需要抓取物体
 			bool shouldPickObject = Global::input->GetMouseDown(GLFW_MOUSE_BUTTON_LEFT);
 			if (shouldPickObject)
 			{
@@ -86,6 +98,7 @@ namespace Velvet
 		VtBuffer<glm::vec3>* m_velocities;
 		VtBuffer<float>* m_invMass;
 
+		// 寻找距离射线最近的顶点信息
 		RaycastCollision FindClosestVertexToRay(Ray ray)
 		{
 			int result = -1;

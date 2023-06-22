@@ -37,6 +37,7 @@ namespace Velvet
 		void ProcessScroll(GLFWwindow* m_window, double xoffset, double yoffset);
 		void ProcessKeyboard(GLFWwindow* m_window);
 
+		// 获取所有组件的指针
 		template <typename T>
 		enable_if_t<is_base_of<Component, T>::value, vector<T*>> FindComponents()
 		{
@@ -64,19 +65,26 @@ namespace Velvet
 		VtCallback<void()> onFinalize;
 
 		bool pendingReset = false;
-		glm::vec4 skyColor = glm::vec4(0.0f);
+		glm::vec4 skyColor = glm::vec4(0.4,0.6,0.8,1.0);
 
 	private:
+		// 初始化
 		void Initialize();
+		// 主循环
 		void MainLoop();
+		// 结束
 		void Finalize();
 
 	private:
+		// 窗口
 		GLFWwindow* m_window = nullptr;
+		// GUI
 		shared_ptr<GUI> m_gui;
+		// Timer
 		shared_ptr<Timer> m_timer;
-
+		// 存储所有actor指针
 		vector<shared_ptr<Actor>> m_actors;
+		// 渲染管线
 		shared_ptr<RenderPipeline> m_renderPipeline;
 	};
 }

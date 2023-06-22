@@ -25,6 +25,7 @@ namespace Velvet
 		{
 			Global::game->onMouseMove.Register(OnMouseMove);
 			Global::game->godUpdate.Register(GodUpdate);
+			Global::game->onMouseScroll.Register(OnMouseScroll);
 		}
 
 		static void GodUpdate()

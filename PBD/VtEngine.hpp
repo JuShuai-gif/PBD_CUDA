@@ -13,7 +13,6 @@ using namespace std;
 它主要分为四个部分：场景、GUI、物体实例、输入
 */
 
-
 namespace Velvet
 {
 	class Scene;

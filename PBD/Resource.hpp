@@ -10,6 +10,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <glm/glm.hpp>
+
 #include "External/stb_image.h"
 #include "Mesh.hpp"
 #include "Material.hpp"
@@ -19,7 +21,7 @@ namespace Velvet
 	class Resource
 	{
 	public:
-
+		// 加载贴图
 		static unsigned int LoadTexture(const string& path)
 		{
 			std::cout << path << std::endl;
@@ -74,7 +76,7 @@ namespace Velvet
 
             return textureID;
 		}
-
+		// 加载网格
 		static shared_ptr<Mesh> LoadMesh(const std::string& path)
 		{
 			if (meshCache.count(path) > 0)
@@ -96,7 +98,6 @@ namespace Velvet
 
 				if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 				{	
-					//fmt::print("Error(Resource) Fail to load mesh ({})\n", path);
 					std::cout << "Error(Resource) Fail to load mesh ({" << path << "})\n";
 					return shared_ptr<Mesh>();
 				}
@@ -105,23 +106,22 @@ namespace Velvet
 
 			int drawCount = mesh->mNumVertices;
 
-			// walk through each of the mesh's vertices
+			// 提取每个三角形的顶点信息
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
-				// positions
+				// 位置
 				vertices.push_back(AdaptVector(mesh->mVertices[i]));
-				// normals
+				// 法线
 				if (mesh->HasNormals())
 				{
 					normals.push_back(AdaptVector(mesh->mNormals[i]));
 				}
 				else
 				{
-					//fmt::print("Normals not found\n");
 					std::cout << "Normals not found\n";
 					exit(-1);
 				}
-				// texture coordinates
+				// UV
 				if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
 				{
 					texCoords.push_back(AdaptVector(mesh->mTextureCoords[0][i]));
@@ -131,19 +131,21 @@ namespace Velvet
 					texCoords.push_back(glm::vec2(0.0f, 0.0f));
 				}
 			}
-			// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+			
+			// 遍历每个三角形面，获取顶点索引
 			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 			{
 				aiFace face = mesh->mFaces[i];
-				// retrieve all indices of the face and store them in the indices vector
+				// 检索面部的所有索引并将其存储在索引向量中
 				for (unsigned int j = 0; j < face.mNumIndices; j++)
 					indices.push_back(face.mIndices[j]);
 			}
+
 			auto result = shared_ptr<Mesh>(new Mesh(vertices, normals, texCoords, indices));
 			meshCache[path] = result;
 			return result;
 		}
-	
+		// 加载材质
 		static shared_ptr<Material> LoadMaterial(const string& path, bool includeGeometryShader = false)
 		{
 			if (matCache.count(path))
@@ -182,7 +184,7 @@ namespace Velvet
 			result->name = path;
 			return result;
 		}
-
+		// 加载文本
 		static string LoadText(const string& path)
 		{
 			// 1. retrieve the vertex/fragment source code from filePath
@@ -205,7 +207,6 @@ namespace Velvet
 			catch (std::ifstream::failure& e)
 			{
 				e;
-				//std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << e.what() << std::endl;
 			}
 			return code;
 		}
@@ -227,9 +228,11 @@ namespace Velvet
 		{
 			return glm::vec2(input.x, input.y);
 		}
-
+		// 贴图备份
 		static inline unordered_map<string, unsigned int> textureCache;
+		// 网格备份存储
 		static inline unordered_map<string, shared_ptr<Mesh>> meshCache;
+		// 材质备份
 		static inline unordered_map<string, shared_ptr<Material>> matCache;
 
 		static inline string defaultTexturePath = "Assets/Texture/";

@@ -7,9 +7,11 @@ namespace Velvet
 {
 	struct SDFCollider
 	{
+		// 碰撞类型
 		ColliderType type;
-
+		// 位置
 		glm::vec3 position;
+		// 缩放
 		glm::vec3 scale;
 
 		float deltaTime;

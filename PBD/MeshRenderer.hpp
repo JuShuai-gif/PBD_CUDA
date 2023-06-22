@@ -39,10 +39,10 @@ namespace Velvet
 
 		void SetupLighting(shared_ptr<Material> m_material);
 
-		int m_numInstances = 0;
-		shared_ptr<Mesh> m_mesh;
-		shared_ptr<Material> m_material;
-		shared_ptr<Material> m_shadowMaterial;
-		MaterialProperty m_materialProperty;
+		int m_numInstances = 0;					// 实例化
+		shared_ptr<Mesh> m_mesh;				// 网格
+		shared_ptr<Material> m_material;		// 材质
+		shared_ptr<Material> m_shadowMaterial;	// 阴影材质
+		MaterialProperty m_materialProperty;	// 材质属性
 	};
 }

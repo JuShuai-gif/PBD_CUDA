@@ -11,9 +11,7 @@ using namespace std;
 
 namespace Velvet
 {
-	/// <summary>
-	/// A class that allows you to create or modify meshes.
-	/// </summary>
+	// 创建和修改材质
 	class Mesh
 	{
 	public:
@@ -40,12 +38,14 @@ namespace Velvet
 				}
 				m_texCoords.push_back(glm::vec2(packedVertices[baseT + 0], packedVertices[baseT + 1]));
 			}
+			// 初始化
 			Initialize(m_positions, m_normals, m_texCoords, indices, attributeSizes);
 		}
 
 		Mesh(const vector<glm::vec3>& vertices, const vector<glm::vec3>& normals = vector<glm::vec3>(),
 			const vector<glm::vec2>& texCoords = vector<glm::vec2>(), const vector<unsigned int>& indices = vector<unsigned int>())
 		{
+			// 初始化
 			Initialize(vertices, normals, texCoords, indices);
 		}
 
@@ -148,9 +148,13 @@ namespace Velvet
 		}
 
 	private:
+		// 位置
 		vector<glm::vec3> m_positions;
+		// 法线
 		vector<glm::vec3> m_normals;
+		// 贴图坐标
 		vector<glm::vec2> m_texCoords;
+		// 索引
 		vector<unsigned int> m_indices;
 
 		GLuint m_VAO = 0;

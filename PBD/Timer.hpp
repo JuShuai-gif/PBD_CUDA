@@ -22,7 +22,7 @@ namespace Velvet
 		Timer()
 		{
 			s_timer = this;
-
+			std::cout << "调用了构造函数！！！" << std::endl;
 			m_lastUpdateTime = (float)CurrentTime();
 			m_fixedUpdateTimer = (float)CurrentTime();
 		}
@@ -52,7 +52,7 @@ namespace Velvet
 			{
 				frame = s_timer->m_frameCount;
 			}
-
+			// 若存在
 			if (s_timer->times.count(label))
 			{
 				if (frame > s_timer->frames[label])
@@ -68,7 +68,6 @@ namespace Velvet
 			}
 			else
 			{
-				// fmt::print("Warning(Timer): EndTimer with undefined label[{}].\n", label);
 				std::cout << "Warning(Timer): EndTimer with undefined label[{" << label << "}].\n";
 				return -1;
 			}
@@ -89,6 +88,7 @@ namespace Velvet
 
 		static double CurrentTime()
 		{
+			// glfwGetTime返回GLFW应用程序启动以来经过的秒数（双精度浮点数表示）
 			return glfwGetTime();
 		}
 	public:
@@ -155,7 +155,7 @@ namespace Velvet
 			float current = (float)CurrentTime();
 			s_timer->m_deltaTime = min(current - s_timer->m_lastUpdateTime, 0.2f);
 			s_timer->m_lastUpdateTime = current;
-
+			//std::cout << "s_timer->m_deltaTime: " << s_timer->m_deltaTime << std::endl;
 			//fmt::print("dt: {}\n", s_timer->m_deltaTime);
 		}
 
@@ -222,20 +222,20 @@ namespace Velvet
 	private:
 		static Timer* s_timer;
 
-		unordered_map<string, double> times;
-		unordered_map<string, double> history;
-		unordered_map<string, int> frames;
-		unordered_map<string, vector<cudaEvent_t>> cudaEvents;
-		unordered_map<string, float> label2accumulatedTime;
+		unordered_map<string, double> times;	// 开始时间
+		unordered_map<string, double> history;	// 经过时间
+		unordered_map<string, int> frames;		// 记录每个事件最后一次更新时所处的帧数
+		unordered_map<string, vector<cudaEvent_t>> cudaEvents;	//记录每个CUDA事件的事件对象
+		unordered_map<string, float> label2accumulatedTime;		// 记录周期性事件的累计时间
 
-		int m_frameCount = 0;
-		int m_physicsFrameCount = 0;
-		float m_elapsedTime = 0.0f;
-		float m_deltaTime = 0.0f;
-		const float m_fixedDeltaTime = 1.0f / 60.0f;
+		int m_frameCount = 0;									// 当前帧数
+		int m_physicsFrameCount = 0;							// 物理帧数
+		float m_elapsedTime = 0.0f;								// 已经经过的时间
+		float m_deltaTime = 0.0f;								// 上一帧到这一帧的时间差
+		const float m_fixedDeltaTime = 1.0f / 60.0f;			// 固定时间步长
 
-		float m_lastUpdateTime = 0.0f;
-		float m_fixedUpdateTimer = 0.0f;
+		float m_lastUpdateTime = 0.0f;							// 上一次更新时间
+		float m_fixedUpdateTimer = 0.0f;						// 距离上一次fixed update的时间
 	};
 
 
