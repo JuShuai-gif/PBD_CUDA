@@ -50,6 +50,7 @@ namespace Velvet
 
 		void Render()
 		{
+			// 寻找所有带MeshRenderer的组件进行渲染
 			vector<MeshRenderer*> renderers = Global::game->FindComponents<MeshRenderer>();
 			//renderers = Cull(renderers);
 			RenderShadow(renderers);

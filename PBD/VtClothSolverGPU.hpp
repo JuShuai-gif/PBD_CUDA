@@ -15,6 +15,7 @@
 #include "VtBuffer.hpp"
 #include "SpatialHashGPU.hpp"
 #include "MouseGrabber.hpp"
+#include "Collider.hpp"
 
 using namespace std;
 
@@ -26,23 +27,30 @@ namespace Velvet
 
 		void Start() override
 		{
+			// 粒子数为0
 			Global::simParams.numParticles = 0;
+			// 找到所有的碰撞组件
 			m_colliders = Global::game->FindComponents<Collider>();
+			// 初始化鼠标抓取
 			m_mouseGrabber.Initialize(&positions, &velocities, &invMasses);
 			//ShowDebugGUI();
 		}
 
 		void Update() override
 		{
+			// 处理鼠标抓取交互
 			m_mouseGrabber.HandleMouseInteraction();
 		}
 
 		void FixedUpdate() override
 		{
+			// 更新抓取点信息(位置、速度)
 			m_mouseGrabber.UpdateGrappedVertex();
+			// 处理碰撞
 			UpdateColliders(m_colliders);
 
 			Timer::StartTimer("GPU_TIME");
+			// 模拟
 			Simulate();
 			Timer::EndTimer("GPU_TIME");
 		}
@@ -91,7 +99,9 @@ namespace Velvet
 					SolveStretch(predicted, deltas, deltaCounts, stretchIndices, stretchLengths, invMasses, (uint)stretchLengths.size());
 					SolveAttachment(predicted, deltas, deltaCounts, invMasses,
 						attachParticleIDs, attachSlotIDs, attachSlotPositions, attachDistances, (uint)attachParticleIDs.size());
-					//SolveBending(predicted, deltas, deltaCounts, bendIndices, bendAngles, invMasses, (uint)bendAngles.size(), substepTime);
+					
+					SolveBending(predicted, deltas, deltaCounts, bendIndices, bendAngles, invMasses, (uint)bendAngles.size(), substepTime);
+					
 					ApplyDeltas(predicted, deltas, deltaCounts);
 				}
 
@@ -188,7 +198,7 @@ namespace Velvet
 			bendIndices.push_back(idx4);
 			bendAngles.push_back(angle);
 		}
-
+		// 更新碰撞
 		void UpdateColliders(vector<Collider*>& colliders)
 		{
 			sdfColliders.resize(colliders.size());

@@ -33,6 +33,7 @@ namespace Velvet
 		VtCallback<void()> onExit;
 
 	protected:
+		
 		template <class T>
 		void ModifyParameter(T* ptr, T value)
 		{
@@ -250,7 +251,7 @@ namespace Velvet
 
 		shared_ptr<Mesh> GenerateRopeMesh()
 		{
-			auto mesh = Resource::LoadMesh("cube.obj");
+			auto mesh = Resource::LoadMesh("quad.obj");
 			return mesh;
 		}
 
@@ -289,6 +290,7 @@ namespace Velvet
 			//auto prenderer = make_shared<ParticleRenderer>();
 			auto prenderer = make_shared<ParticleGeometryRenderer>();
 
+			// 添加布料解算器
 #ifdef SOLVER_CPU
 			auto clothObj = make_shared<VtClothObject>(resolution);
 #else

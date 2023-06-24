@@ -118,12 +118,13 @@ void GameInstance::ProcessKeyboard(GLFWwindow* m_window)
 	}
 }
 
-// 初始化
+// 初始化，所有Actor均处于start状态
 void GameInstance::Initialize()
 {
 	// 所有物体都开始
 	for (const auto& go : m_actors)
 	{
+		// Actor的start调用当前actor的所有组件的start
 		go->Start();
 	}
 }
@@ -182,7 +183,7 @@ void GameInstance::MainLoop()
 
 		Timer::EndTimer("CPU_TIME");
 
-		// Render
+		// 渲染流水线的渲染
 		m_renderPipeline->Render();
 		if (!Global::gameState.hideGUI) m_gui->Render();
 

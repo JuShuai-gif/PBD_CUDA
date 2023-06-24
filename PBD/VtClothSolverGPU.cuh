@@ -15,16 +15,18 @@ namespace Velvet
 		glm::vec3 scale;
 
 		float deltaTime;
+		// 当前
 		glm::mat3 curTransform;
 		glm::mat4 invCurTransform;
 		glm::mat4 lastTransform;
-
+		// 将value划分为 -1,0,1
 		__device__ float sgn(float value) const { return (value > 0) ? 1.0f : (value < 0 ? -1.0f : 0.0f); }
-
+		// 计算SDF
 		__device__ glm::vec3 ComputeSDF(const glm::vec3 targetPosition, const float collisionMargin) const
 		{
 			if (type == ColliderType::Plane)
 			{
+				// 计算位移量
 				float offset = targetPosition.y - (position.y + collisionMargin);
 				if (offset < 0)
 				{
@@ -89,7 +91,7 @@ namespace Velvet
 			}
 			return glm::vec3(0);
 		}
-	
+		// 目标点速度
 		__device__ glm::vec3 VelocityAt(const glm::vec3 targetPosition)
 		{
 			glm::vec4 lastPos = lastTransform * invCurTransform * glm::vec4(targetPosition, 1.0);
@@ -97,17 +99,17 @@ namespace Velvet
 			return vel;
 		}
 	};
-
+	// 设置模拟参数
 	void SetSimulationParams(VtSimParams* hostParams);
-
+	// 初始化位置
 	void InitializePositions(glm::vec3* positions, const int start, const int count, const glm::mat4 modelMatrix);
-
+	// 预测位置
 	void PredictPositions(
 		glm::vec3* predicted,
 		glm::vec3* velocities,
 		CONST(glm::vec3*) positions,
 		const float deltaTime);
-
+	// 解决拉伸
 	void SolveStretch(
 		glm::vec3* predicted,
 		glm::vec3* deltas,
@@ -119,6 +121,7 @@ namespace Velvet
 	
 	// Bending doesn't work well with Jacobi. Small compliance lead to shaking, large compliance makes no effect.
 	// It's recommended to disable this.
+	// 弯曲
 	void SolveBending(
 		glm::vec3* predicted,
 		glm::vec3* deltas,
@@ -128,7 +131,7 @@ namespace Velvet
 		CONST(float*) invMass,
 		const uint numConstraints,
 		const float deltaTime);
-
+	// 解决附件
 	void SolveAttachment(
 		glm::vec3* predicted,
 		glm::vec3* deltas,
@@ -141,14 +144,14 @@ namespace Velvet
 		const int numConstraints);
 
 	void ApplyDeltas(glm::vec3* predicted, glm::vec3* deltas, int* deltaCounts);
-
+	// 
 	void CollideSDF(
 		glm::vec3* predicted,
 		CONST(SDFCollider*) colliders,
 		CONST(glm::vec3*) positions,
 		const uint numColliders,
 		const float deltaTime);
-
+	// 粒子碰撞
 	void CollideParticles(
 		glm::vec3* deltas,
 		int* deltaCounts,
@@ -156,13 +159,13 @@ namespace Velvet
 		CONST(float*) invMasses,
 		CONST(uint*) neighbors,
 		CONST(glm::vec3*) positions);
-
+	// 结束
 	void Finalize(
 		glm::vec3* velocities,
 		glm::vec3* positions,
 		CONST(glm::vec3*) predicted,
 		const float deltaTime);
-
+	// 计算法线
 	void ComputeNormal(
 		glm::vec3* normals,
 		CONST(glm::vec3*) positions,

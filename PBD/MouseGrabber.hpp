@@ -55,16 +55,20 @@ namespace Velvet
 			if (shouldPickObject)
 			{
 				Ray ray = GetMouseRay();
+				// 寻找最近的点信息
 				m_rayCollision = FindClosestVertexToRay(ray);
-
+				// 鼠标确定点击
 				if (m_rayCollision.collide)
 				{
+					// 已经被抓取
 					m_isGrabbing = true;
+					// 被抓取点的质量
 					m_grabbedVertexMass = (*m_invMass)[m_rayCollision.objectIndex];
+					// 将抓取点的质量置为0
 					(*m_invMass)[m_rayCollision.objectIndex] = 0;
 				}
 			}
-
+			// 释放物体
 			bool shouldReleaseObject = Global::input->GetMouseUp(GLFW_MOUSE_BUTTON_LEFT);
 			if (shouldReleaseObject && m_isGrabbing)
 			{
@@ -73,11 +77,13 @@ namespace Velvet
 			}
 		}
 
+		// 更新抓取点
 		void UpdateGrappedVertex()
 		{
 			if (m_isGrabbing)
 			{
 				Ray ray = GetMouseRay();
+				// 鼠标在世界坐标中的位置
 				glm::vec3 mousePos = ray.origin + ray.direction * m_rayCollision.distanceToOrigin;
 				int id = m_rayCollision.objectIndex;
 				auto curPos = (*m_positions)[id];

@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "Actor.hpp"
@@ -432,4 +433,4 @@ namespace Velvet
 		shared_ptr<Mesh> m_mesh;
 		shared_ptr<SpatialHashCPU> m_spatialHash;
 	};
-}
+}*/

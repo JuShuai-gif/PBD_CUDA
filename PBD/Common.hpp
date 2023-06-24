@@ -16,6 +16,7 @@
 	#define HOST_INIT(val) = val
 #endif
 
+// Ä£Äâ²ÎÊý
 struct VtSimParams
 {
 	int numSubsteps					HOST_INIT(2);

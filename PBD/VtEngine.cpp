@@ -19,19 +19,19 @@ void PrintGlfwError(int error, const char* description)
 VtEngine::VtEngine()
 {
 	Global::engine = this;
-	// setup glfw
+	// 设置 glfw
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	// Multi-sample Anti-aliasing
+
+	// 重采样 抗锯齿
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	m_window = glfwCreateWindow(Global::Config::screenWidth, Global::Config::screenHeight, "Velvet", NULL, NULL);
 
 	if (m_window == NULL)
 	{
-		//fmt::print("Failed to create GLFW window\n");
 		std::cout << "Failed to create GLFW window\n";
 		glfwTerminate();
 		return;
@@ -96,11 +96,13 @@ int VtEngine::Run()
 			"┌{0:\-^{2}}┐\n" <<
 			"│{1: ^{2}}│\n" <<
 			"└{0:\-^{2}}┘\n" << "" << "Hello, Velvet!" << std::endl;
-
+		// 创建一个GameInstance实例
 		m_game = make_shared<GameInstance>(m_window, m_gui);
 		sceneIndex = m_nextSceneIndex;
+		// 设置场景信息
 		scenes[sceneIndex]->PopulateActors(m_game.get());
 		scenes[sceneIndex]->onEnter.Invoke();
+		// 主循环
 		m_game->Run();
 		scenes[sceneIndex]->onExit.Invoke();
 		scenes[sceneIndex]->ClearCallbacks();
