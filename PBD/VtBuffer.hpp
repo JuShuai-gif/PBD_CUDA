@@ -253,6 +253,8 @@ namespace Velvet
 			return m_vbuffer.size();
 		}
 
+
+		// Í¬²½
 		void sync()
 		{
 			// copy from vbuffer to rbuffers

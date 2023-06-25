@@ -453,14 +453,14 @@ namespace Velvet
 			raw_vel = raw_vel / raw_vel_len * d_params.maxSpeed;
 			new_pos = positions[id] + raw_vel * deltaTime;
 			//printf("Limit vel[%.3f>%.3f] for id[%d]. Pred[%.3f,%.3f,%.3f], Pos[%.3f,%.3f,%.3f]\n", raw_vel_len, d_params.maxSpeed, id);
-			printf("new_pos %f %f %f\n", new_pos.x, new_pos.y, new_pos.z);
+			//printf("new_pos %f %f %f\n", new_pos.x, new_pos.y, new_pos.z);
 		}
 		velocities[id] = raw_vel * (1 - d_params.damping * deltaTime);
 		positions[id] = new_pos;
 		//printf("new_pos %f %f %f\n", new_pos.x, new_pos.y, new_pos.z);
 	}
 
-	// 模拟走一遍之后执行该函数
+	// 模拟最后异步  执行该函数(相当于把所有的修正都计算完，最终应用到位置上)
 	void Finalize(
 		glm::vec3* velocities, 
 		glm::vec3* positions,

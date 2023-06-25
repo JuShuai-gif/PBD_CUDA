@@ -19,11 +19,16 @@ namespace Velvet
 			m_resolution = resolution;
 		}
 
+		// indices决定了某个顶点的附着状态
+		/*
+		indices表示某个顶点的索引，0表示第0个顶点，15表示第15个顶点
+		*/
 		void SetAttachedIndices(vector<int> indices)
 		{
 			m_attachedIndices = indices;
 		}
 
+		// 粒子直径
 		auto particleDiameter() const
 		{
 			return m_particleDiameter;
@@ -42,16 +47,25 @@ namespace Velvet
 	public:
 		void Start() override
 		{
+			// 获取网格
 			auto mesh = actor->GetComponent<MeshRenderer>()->mesh();
+			// 获取 transform
 			auto transformMatrix = actor->transform->matrix();
+			// 位置
 			auto positions = mesh->vertices();
+			// 索引
 			auto indices = mesh->indices();
 			m_particleDiameter = glm::length(positions[0] - positions[1]) * Global::simParams.particleDiameterScalar;
 
+			//std::cout << Helper::to_string(positions[0] - positions[1]) << std::endl;
+
 			m_indexOffset = m_solver->AddCloth(mesh, transformMatrix, m_particleDiameter);
+
+			std::cout << "m_indexOffset" << m_indexOffset << std::endl;
 			actor->transform->Reset();
 
 			ApplyTransform(positions, transformMatrix);
+
 			GenerateStretch(positions);
 			GenerateAttach(positions);
 			GenerateBending(indices);
@@ -64,6 +78,7 @@ namespace Velvet
 		vector<int> m_attachedIndices;
 		float m_particleDiameter;
 
+		// 应用Transform矩阵（这个矩阵囊括了位置、旋转、缩放）
 		void ApplyTransform(vector<glm::vec3>& positions, glm::mat4 transform)
 		{
 			for (int i = 0; i < positions.size(); i++)
@@ -72,6 +87,7 @@ namespace Velvet
 			}
 		}
 
+		// 生成拉伸约束
 		void GenerateStretch(const vector<glm::vec3> &positions)
 		{
 			auto VertexAt = [this](int x, int y) {
@@ -115,6 +131,7 @@ namespace Velvet
 			}
 		}
 	
+		// 产生弯曲约束
 		void GenerateBending(const vector<unsigned int>& indices)
 		{
 			// HACK: not for every kind of mesh
@@ -131,11 +148,14 @@ namespace Velvet
 			}
 		}
 
+		// 产生附着
 		void GenerateAttach(const vector<glm::vec3>& positions)
 		{
 			for (int slotIdx = 0; slotIdx < m_attachedIndices.size(); slotIdx++)
 			{
+				// 粒子IDs
 				int particleID = m_attachedIndices[slotIdx];
+				// 粒子ID的位置
 				glm::vec3 slotPos = positions[particleID];
 				m_solver->AddAttachSlot(slotPos);
 				for (int i = 0; i < positions.size(); i++)

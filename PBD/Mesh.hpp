@@ -169,11 +169,11 @@ namespace Velvet
 			m_texCoords = texCoords;
 			m_indices = indices;
 
-			// 1. bind Vertex Array Object
+			// 1. 绑定顶点数组
 			glGenVertexArrays(1, &m_VAO);
 			glBindVertexArray(m_VAO);
 
-			// 2. copy our vertices array in a buffer for OpenGL to use
+			// 2. 复制顶点数组到 VBO 
 			if (vertices.size()) 
 			{
 				auto vbo = AllocateVBO(3);

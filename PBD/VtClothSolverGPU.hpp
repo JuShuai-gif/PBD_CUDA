@@ -102,29 +102,34 @@ namespace Velvet
 				// 每步长碰撞
 				CollideSDF(predicted, sdfColliders, positions, (uint)sdfColliders.size(), substepTime);
 
+				// 迭代求约束
 				for (int iteration = 0; iteration < Global::simParams.numIterations; iteration++)
 				{
+					// 拉伸约束
 					SolveStretch(predicted, deltas, deltaCounts, stretchIndices, stretchLengths, invMasses, (uint)stretchLengths.size());
+					// 附加约束
 					SolveAttachment(predicted, deltas, deltaCounts, invMasses,
 						attachParticleIDs, attachSlotIDs, attachSlotPositions, attachDistances, (uint)attachParticleIDs.size());
-					
+					// 弯曲约束
 					SolveBending(predicted, deltas, deltaCounts, bendIndices, bendAngles, invMasses, (uint)bendAngles.size(), substepTime);
-					
+					// 应用修正
 					ApplyDeltas(predicted, deltas, deltaCounts);
 				}
-
+				// 最终叠加
 				Finalize(velocities, positions, predicted, substepTime);
 			}
-
+			// 修正后的法线
 			ComputeNormal(normals, positions, indices, (uint)(indices.size() / 3));
 
 			//==========================
-			// Sync
+			// 同步操作
 			//==========================
 			Timer::EndTimerGPU("Solver_Total");
 			cudaDeviceSynchronize();
 
+			// 位置同步
 			positions.sync();
+			// 法线同步
 			normals.sync();
 		}
 	public:
@@ -132,17 +137,20 @@ namespace Velvet
 		int AddCloth(shared_ptr<Mesh> mesh, glm::mat4 modelMatrix, float particleDiameter)
 		{
 			Timer::StartTimer("INIT_SOLVER_GPU");
-
+			// 粒子数
 			int prevNumParticles = Global::simParams.numParticles;
+			// 新粒子数量
 			int newParticles = (int)mesh->vertices().size();
 
 			// Set global parameters
+			// 设置全局参数
 			Global::simParams.numParticles += newParticles;
 			Global::simParams.particleDiameter = particleDiameter;
 			Global::simParams.deltaTime = Timer::fixedDeltaTime();
 			Global::simParams.maxSpeed = 2 * particleDiameter / Timer::fixedDeltaTime() * Global::simParams.numSubsteps;
 
 			// Allocate managed buffers
+			// 分配Buffer
 			positions.registerNewBuffer(mesh->verticesVBO());
 			normals.registerNewBuffer(mesh->normalsVBO());
 
@@ -157,12 +165,12 @@ namespace Velvet
 			deltaCounts.push_back(newParticles, 0);
 			invMasses.push_back(newParticles, 1.0f);
 
-			// Initialize buffer datas
+			// 初始化位置
 			InitializePositions(positions, prevNumParticles, newParticles, modelMatrix);
 			cudaDeviceSynchronize();
 			positions.sync();
 
-			// Initialize member variables
+			// 初始化成员变量
 			m_spatialHash = make_shared<SpatialHashGPU>(particleDiameter, Global::simParams.numParticles);
 			m_spatialHash->SetInitialPositions(positions);
 
@@ -178,39 +186,54 @@ namespace Velvet
 			return prevNumParticles;
 		}
 
+		// 增加拉伸约束
 		void AddStretch(int idx1, int idx2, float distance)
 		{
+			// 约束索引
 			stretchIndices.push_back(idx1);
 			stretchIndices.push_back(idx2);
+			// 约束距离
 			stretchLengths.push_back(distance);
 		}
 
+		// 增加附加物约束
 		void AddAttachSlot(glm::vec3 attachSlotPos)
 		{
 			attachSlotPositions.push_back(attachSlotPos);
 		}
 
+		// 增加附加物
 		void AddAttach(int particleIndex, int slotIndex, float distance)
 		{
-			if (distance == 0) invMasses[particleIndex] = 0;
+			// 质量为0表示静止
+			if (distance == 0) 
+				invMasses[particleIndex] = 0;
+			// 附加物粒子ID
 			attachParticleIDs.push_back(particleIndex);
+			// 附加槽ID 
 			attachSlotIDs.push_back(slotIndex);
+			// 距离
 			attachDistances.push_back(distance);
 		}
 
+		// 增加弯曲约束
 		void AddBend(uint idx1, uint idx2, uint idx3, uint idx4, float angle)
 		{
+			// 二面角索引
 			bendIndices.push_back(idx1);
 			bendIndices.push_back(idx2);
 			bendIndices.push_back(idx3);
 			bendIndices.push_back(idx4);
+			// 二面角角度
 			bendAngles.push_back(angle);
 		}
+		
 		// 更新碰撞
 		void UpdateColliders(vector<Collider*>& colliders)
 		{
+			// 大小更新
 			sdfColliders.resize(colliders.size());
-
+			// 挨个赋值
 			for (int i = 0; i < colliders.size(); i++)
 			{
 				const Collider* c = colliders[i];

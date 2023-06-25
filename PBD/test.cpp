@@ -35,7 +35,7 @@ public:
 #else
         auto clothObj = cloth->GetComponent<VtClothObjectGPU>();
 #endif
-        if (clothObj) clothObj->SetAttachedIndices({ 0, clothResolution });
+        if (clothObj) clothObj->SetAttachedIndices({ 0, clothResolution-3 });
     }
 };
 
