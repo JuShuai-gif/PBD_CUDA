@@ -67,31 +67,39 @@ namespace Velvet
 			//==========================
 			// Prepare
 			//==========================
+			// 帧时间
 			float frameTime = Timer::fixedDeltaTime();
+			// 每帧 每次 迭代需要的时间
 			float substepTime = Timer::fixedDeltaTime() / Global::simParams.numSubsteps;
 
 			//==========================
 			// Launch kernel
 			//==========================
+			// 设置模拟参数
 			SetSimulationParams(&Global::simParams);
 
 			// External colliders can move relatively fast, and cloth will have large velocity after colliding with them.
 			// This can produce unstable behavior, such as vertex flashing between two sides.
 			// We include a pre-stabilization step to mitigate this issue. Collision here will not influence velocity.
+			// 第一个positions是碰撞修正后   第二个是原始位置
+			// 碰撞是每帧进行碰撞
 			CollideSDF(positions, sdfColliders, positions, (uint)sdfColliders.size(), frameTime);
-
-			for (int substep = 0; substep < Global::simParams.numSubsteps; substep++)
+			// 预测是每帧时间除以步长之后的次数进行迭代
+			for (int substep = 0; substep < Global::simParams.numSubsteps; ++substep)
 			{
+				// 重力修正
 				PredictPositions(predicted, velocities, positions, substepTime);
-
+				// 处理自相交
 				if (Global::simParams.enableSelfCollision)
 				{
 					if (substep % Global::simParams.interleavedHash == 0)
 					{
 						m_spatialHash->Hash(predicted);
 					}
+					// 粒子碰撞
 					CollideParticles(deltas, deltaCounts, predicted, invMasses, m_spatialHash->neighbors, positions);
 				}
+				// 每步长碰撞
 				CollideSDF(predicted, sdfColliders, positions, (uint)sdfColliders.size(), substepTime);
 
 				for (int iteration = 0; iteration < Global::simParams.numIterations; iteration++)
@@ -221,6 +229,7 @@ namespace Velvet
 
 	public: // Sim buffers
 
+		// positions和normals是需要和OpenGL交互的，所以是VtMergedBuffer类型
 		VtMergedBuffer<glm::vec3> positions;
 		VtMergedBuffer<glm::vec3> normals;
 		VtBuffer<uint> indices;
@@ -331,6 +340,5 @@ namespace Velvet
 				}
 				});
 		}
-
 	};
 }

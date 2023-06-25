@@ -4,17 +4,21 @@
 
 namespace Velvet
 {
+	/*
+	存储T类型的数据的数据结构，它类似于Vector,但是它的内存是在CUDA设备端分配的
+	*/
 	template <class T>
 	class VtBuffer
 	{
 	public:
+		// 无参构造
 		VtBuffer() {}
-
+		// 大小参数的构造
 		VtBuffer(uint size)
 		{
 			resize(size);
 		}
-
+		// 
 		VtBuffer(const VtBuffer&) = delete;
 
 		VtBuffer& operator=(const VtBuffer&) = delete;
@@ -56,11 +60,12 @@ namespace Velvet
 			memcpy(m_buffer + offset, data.data(), data.size() * sizeof(T));
 		}
 
+		// 扩容
 		void reserve(size_t minCapacity)
 		{
 			if (minCapacity > m_capacity)
 			{
-				// growth factor of 1.5
+				// 每次增长1.5倍
 				const size_t newCapacity = minCapacity * 3 / 2;
 
 				T* newBuf = VtAllocBuffer<T>(newCapacity);
@@ -68,11 +73,15 @@ namespace Velvet
 				// copy contents to new buffer			
 				if (m_buffer)
 				{
+					// cudaMallocManaged分配的内存，可以在主机和设备之间进行透明访问
+					// 意味着可以在主机上使用标准的内存操作函数来复制数据到CUDA管理的内存，
+					// 以及从CUDA管理的内存中复制数据回主机
 					memcpy(newBuf, m_buffer, m_count * sizeof(T));
+					// 拷贝完，释放内存
 					VtFreeBuffer(m_buffer);
 				}
 
-				// swap
+				// 交换
 				m_buffer = newBuf;
 				m_capacity = newCapacity;
 			}
@@ -101,6 +110,7 @@ namespace Velvet
 			return m_buffer;
 		}
 
+		// 销毁
 		void destroy()
 		{
 			if (m_buffer != nullptr)
@@ -118,6 +128,9 @@ namespace Velvet
 		T* m_buffer = nullptr;
 	};
 
+	/*
+	CUDA提供了与OpenGL交互功能，可以使用CUDA进行计算并将结果直接用于OpenGL渲染
+	*/
 	template <class T>
 	class VtRegisteredBuffer
 	{
@@ -166,15 +179,35 @@ namespace Velvet
 		// CUDA interop with OpenGL
 		void registerBuffer(GLuint vbo)
 		{
+			/* 
+			参数一：指向cudaGraphicsResource指针的指针，用于存储注册后的CUDA图形资源，
+					通过该指针，可以在后续的CUDA操作中访问和操作OpenGL缓冲区
+			参数二：注册为CUDA图形资源的OpenGL缓冲区对象标识符
+					它是通过OpenGL函数(glGenBuffers、glBindBuffer)分配和绑定的缓冲区对象
+			参数三：可选的标志参数
+			*/
 			checkCudaErrors(cudaGraphicsGLRegisterBuffer(&m_cudaVboResource, vbo, cudaGraphicsRegisterFlagsNone));
 
 			// map (example 'gl_cuda_interop_pingpong_st' says map and unmap only needs to be done once)
+			/*
+			参数一：映射的CUDA图形资源的数量
+			参数二：要映射的CUDA图形资源的数组
+			参数三：可选参数，用于指定用于映射操作的CUDA流
+			*/
 			checkCudaErrors(cudaGraphicsMapResources(1, &m_cudaVboResource, 0));
+			
+			/*
+			参数一：输出参数，用于存储获取到的CUDA指针的指针，通过它，可以在CUDA内核中访问OpenGL缓冲区的数据
+			参数二：输出参数，用于存储映射区域的大小的指针，可以使用该大小来确定映射区域的有效范围
+			*/
 			checkCudaErrors(cudaGraphicsResourceGetMappedPointer((void**)&m_buffer, &m_numBytes,
 				m_cudaVboResource));
 			m_count = m_numBytes / sizeof(T);
 
-			// unmap
+			/*
+			参数一：取消映射的CUDA图形资源的数量
+			参数二：要取消的CUDA图形资源的数组
+			*/
 			checkCudaErrors(cudaGraphicsUnmapResources(1, &m_cudaVboResource, 0));
 		}
 
@@ -182,6 +215,7 @@ namespace Velvet
 		size_t m_numBytes = 0;
 		T* m_buffer = nullptr;
 		T* m_bufferCPU = nullptr;
+
 		struct cudaGraphicsResource* m_cudaVboResource = nullptr;
 	};
 
